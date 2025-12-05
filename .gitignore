@@ -53,3 +53,5 @@ models/*.pkl
 models/*.h5
 models/*.pt
 *.model
+
+.env
