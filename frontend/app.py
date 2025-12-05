@@ -52,6 +52,11 @@ st.markdown("""
 API_URL = "http://localhost:8000"
 
 def main():
+    
+    if st.button("🔄 Clear Cache", key="clear_cache_btn"):
+        st.cache_data.clear()
+        st.rerun()
+    
     st.markdown('<h1 class="main-header">📄 AI Resume Analyzer</h1>', unsafe_allow_html=True)
     
     st.markdown("""
@@ -75,6 +80,12 @@ def main():
         
         # Analyze button
         if st.button("🔍 Analyze Resume", type="primary", use_container_width=True):
+            # Clear previous session state
+            if 'analysis_data' in st.session_state:
+                del st.session_state.analysis_data
+            if 'company_matches' in st.session_state:
+                del st.session_state.company_matches
+            
             with st.spinner("Analyzing your resume... This may take a few seconds."):
                 try:
                     # Send request to API
@@ -113,6 +124,13 @@ def display_validation_error(error_data):
 
 def display_results(data):
     """Display analysis results"""
+    
+    # Store data in session state
+    if 'analysis_data' not in st.session_state:
+        st.session_state.analysis_data = data
+    
+    # Use session state data
+    data = st.session_state.analysis_data
     
     # Validation status
     validation = data['validation']
@@ -240,50 +258,81 @@ def display_company_matches(data):
     # Detailed breakdown
     st.markdown("### 📋 Detailed Company Analysis")
     
+    # Initialize session state for selected company
+    if 'selected_company_idx' not in st.session_state:
+        st.session_state.selected_company_idx = 0
+    
+    # Get company names
+    company_names = [m['company'] for m in company_matches[:10]]
+    
+    # Selectbox with on_change callback
+    def update_company():
+        st.session_state.selected_company_idx = company_names.index(st.session_state.company_select)
+    
     selected_company = st.selectbox(
         "Select a company to see detailed breakdown:",
-        [m['company'] for m in company_matches[:10]]
+        company_names,
+        index=st.session_state.selected_company_idx,
+        key="company_select",
+        on_change=update_company
     )
     
-    selected_data = next(m for m in company_matches if m['company'] == selected_company)
+    # Get selected company data
+    selected_data = company_matches[st.session_state.selected_company_idx]
     
-    col1, col2 = st.columns(2)
+    # Create a container that will be updated
+    detail_container = st.container()
     
-    with col1:
-        st.markdown("#### Match Factors")
-        factors = selected_data['factors']
+    with detail_container:
+        col1, col2 = st.columns(2)
         
-        fig_factors = go.Figure(data=[
-            go.Bar(
+        with col1:
+            st.markdown("#### Match Factors")
+            factors = selected_data['factors']
+            
+            # Force new chart with unique data
+            fig_factors = go.Figure()
+            fig_factors.add_trace(go.Bar(
                 x=list(factors.values()),
                 y=list(factors.keys()),
                 orientation='h',
-                marker=dict(color='#1f77b4')
+                marker=dict(color='#1f77b4'),
+                text=[f"{v:.1f}%" for v in factors.values()],
+                textposition='auto',
+                hovertemplate='%{y}: %{x:.1f}%<extra></extra>'
+            ))
+            
+            fig_factors.update_layout(
+                xaxis_title="Score (%)",
+                yaxis_title="Factor",
+                height=300,
+                showlegend=False,
+                xaxis=dict(range=[0, 105]),
+                margin=dict(l=0, r=0, t=30, b=0)
             )
-        ])
-        fig_factors.update_layout(
-            xaxis_title="Score (%)",
-            yaxis_title="Factor",
-            height=300,
-            showlegend=False
-        )
-        st.plotly_chart(fig_factors, use_container_width=True)
-    
-    with col2:
-        st.markdown("#### Experience Comparison")
-        st.metric(
-            label="Required Experience",
-            value=f"{selected_data['required_experience']:.1f} years"
-        )
-        st.metric(
-            label="Your Experience",
-            value=f"{selected_data['candidate_experience']:.1f} years",
-            delta=f"{selected_data['candidate_experience'] - selected_data['required_experience']:.1f} years"
-        )
-        st.metric(
-            label="Confidence Level",
-            value=selected_data['confidence'].title()
-        )
+            
+            # Use a unique key based on company name
+            st.plotly_chart(fig_factors, use_container_width=True, key=f"chart_{selected_company}")
+        
+        with col2:
+            st.markdown("#### Experience Comparison")
+            st.metric(
+                label="Required Experience",
+                value=f"{selected_data['required_experience']:.1f} years"
+            )
+            st.metric(
+                label="Your Experience",
+                value=f"{selected_data['candidate_experience']:.1f} years",
+                delta=f"{selected_data['candidate_experience'] - selected_data['required_experience']:.1f} years"
+            )
+            st.metric(
+                label="Confidence Level",
+                value=selected_data['confidence'].title()
+            )
+            
+            # Show probability prominently
+            st.markdown("---")
+            st.markdown(f"### 🎯 Match Score: {selected_data['probability']:.1f}%")
 
 def display_recommendations(data):
     """Display improvement recommendations"""

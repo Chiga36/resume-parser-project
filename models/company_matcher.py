@@ -49,13 +49,14 @@ class CompanyMatcher:
                     if exp_match:
                         experience_levels.append(int(exp_match.group(1)))
             
+            # Convert NumPy types to Python native types for JSON serialization
             profiles[company] = {
                 'company_name': company,
-                'job_count': len(company_jobs),
+                'job_count': int(len(company_jobs)),  # Convert to Python int
                 'description_text': all_descriptions,
-                'avg_experience_required': np.mean(experience_levels) if experience_levels else 2,
-                'min_experience': np.min(experience_levels) if experience_levels else 0,
-                'max_experience': np.max(experience_levels) if experience_levels else 5
+                'avg_experience_required': float(np.mean(experience_levels)) if experience_levels else 2.0,  # Convert to Python float
+                'min_experience': int(np.min(experience_levels)) if experience_levels else 0,  # Convert to Python int
+                'max_experience': int(np.max(experience_levels)) if experience_levels else 5  # Convert to Python int
             }
         
         # Save profiles
@@ -65,6 +66,8 @@ class CompanyMatcher:
         
         self.company_profiles = profiles
         return profiles
+
+
     
     def calculate_match_score(self, resume_features: Dict, company_name: str) -> float:
         """Calculate match score between resume and company using cosine similarity"""
