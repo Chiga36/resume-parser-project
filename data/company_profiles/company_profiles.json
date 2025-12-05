@@ -1,0 +1,82 @@
+{
+  "Google": {
+    "company_name": "Google",
+    "job_count": 50,
+    "description_text": "python java javascript react angular machine learning tensorflow pytorch deep learning algorithms data structures distributed systems gcp cloud computing docker kubernetes",
+    "avg_experience_required": 3,
+    "min_experience": 0,
+    "max_experience": 5
+  },
+  "Microsoft": {
+    "company_name": "Microsoft",
+    "job_count": 45,
+    "description_text": "c# .net azure python javascript react typescript sql server cloud computing devops ci/cd kubernetes docker",
+    "avg_experience_required": 3,
+    "min_experience": 1,
+    "max_experience": 5
+  },
+  "Amazon": {
+    "company_name": "Amazon",
+    "job_count": 60,
+    "description_text": "java python aws cloud computing distributed systems microservices algorithms data structures scala linux docker",
+    "avg_experience_required": 2,
+    "min_experience": 0,
+    "max_experience": 4
+  },
+  "Apple": {
+    "company_name": "Apple",
+    "job_count": 40,
+    "description_text": "swift objective-c python c++ machine learning ios macos software engineering algorithms computer vision",
+    "avg_experience_required": 3,
+    "min_experience": 1,
+    "max_experience": 5
+  },
+  "Meta": {
+    "company_name": "Meta",
+    "job_count": 55,
+    "description_text": "python java react javascript machine learning deep learning pytorch tensorflow distributed systems algorithms",
+    "avg_experience_required": 3,
+    "min_experience": 0,
+    "max_experience": 5
+  },
+  "TCS": {
+    "company_name": "TCS",
+    "job_count": 40,
+    "description_text": "java python sql web development spring boot hibernate mysql oracle agile scrum",
+    "avg_experience_required": 2,
+    "min_experience": 0,
+    "max_experience": 3
+  },
+  "Infosys": {
+    "company_name": "Infosys",
+    "job_count": 35,
+    "description_text": "java python javascript react angular nodejs mongodb mysql database web development",
+    "avg_experience_required": 2,
+    "min_experience": 0,
+    "max_experience": 3
+  },
+  "Wipro": {
+    "company_name": "Wipro",
+    "job_count": 38,
+    "description_text": "java python .net sql server web services rest api spring boot cloud computing",
+    "avg_experience_required": 2,
+    "min_experience": 0,
+    "max_experience": 3
+  },
+  "Cognizant": {
+    "company_name": "Cognizant",
+    "job_count": 42,
+    "description_text": "java python javascript angular react sql cloud computing aws azure devops",
+    "avg_experience_required": 2,
+    "min_experience": 0,
+    "max_experience": 4
+  },
+  "Accenture": {
+    "company_name": "Accenture",
+    "job_count": 45,
+    "description_text": "java python javascript cloud computing aws azure data analytics consulting agile",
+    "avg_experience_required": 2,
+    "min_experience": 0,
+    "max_experience": 4
+  }
+}

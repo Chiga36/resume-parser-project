@@ -1,0 +1,35 @@
+# Web scraping
+python-jobspy==1.1.66
+selenium==4.16.0
+beautifulsoup4==4.12.2
+
+# PDF processing - USE THESE VERSIONS
+PyMuPDF==1.24.0  # Updated version with better Windows support
+pdfplumber==0.11.0
+
+# NLP and ML
+spacy==3.7.2
+transformers==4.36.0
+torch==2.1.0
+scikit-learn==1.3.2
+
+# API and backend
+fastapi==0.108.0
+uvicorn[standard]==0.25.0
+pydantic==2.5.3
+python-multipart==0.0.6
+
+# Data processing
+pandas==2.1.4
+numpy==1.26.2
+
+# Database (optional)
+sqlalchemy==2.0.25
+
+# Utilities
+python-dotenv==1.0.0
+kaggle==1.5.16
+
+# Additional dependencies
+requests==2.31.0
+plotly==5.18.0
