@@ -54,4 +54,10 @@ models/*.h5
 models/*.pt
 *.model
 
+# Environment variables
 .env
+.env.local
+
+# Kaggle
+kaggle.json
+__pycache__/

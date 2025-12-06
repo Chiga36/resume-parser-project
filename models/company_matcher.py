@@ -6,15 +6,25 @@ from typing import Dict, List
 import json
 from pathlib import Path
 from config import Config
+from models.ml_inference import MLModelInference
 
 class CompanyMatcher:
     """Match resumes with companies and calculate placement probability"""
-    
     def __init__(self):
         self.config = Config()
         self.vectorizer = TfidfVectorizer(max_features=500, stop_words='english')
         self.company_profiles = {}
         self.load_company_profiles()
+        
+        # Load ML models
+        try:
+            self.ml_models = MLModelInference()
+            self.use_ml = True
+            print("✅ ML models loaded in CompanyMatcher")
+        except:
+            print("⚠️ ML models not loaded, using traditional approach")
+            self.ml_models = None
+            self.use_ml = False
     
     def load_company_profiles(self):
         """Load preprocessed company profiles"""
@@ -125,7 +135,7 @@ class CompanyMatcher:
         
         # Factor 3: Education level (20% weight)
         education_level = resume_features.get('education', {}).get('highest_level', 0)
-        education_score = min(education_level / 5.0, 1.0)  # Normalize to max PhD level
+        education_score = min(education_level / 5.0, 1.0)
         
         # Factor 4: Resume completeness (10% weight)
         completeness_score = min(
@@ -134,18 +144,53 @@ class CompanyMatcher:
             1.0
         )
         
-        # Weighted final score
-        final_probability = (
+        # Traditional weighted final score
+        traditional_probability = (
             skills_score * 0.4 +
             experience_score * 0.3 +
             education_score * 0.2 +
             completeness_score * 0.1
-        )
+        ) * 100
+        
+        # ML Model prediction (if available)
+        ml_probability = traditional_probability
+        resume_quality = None
+        
+        if self.use_ml:
+            try:
+                # Prepare features for ML model
+                ml_features = {
+                    'skill_count': len(resume_features.get('skills', [])),
+                    'experience_years': resume_exp,
+                    'education_level': education_level,
+                    'word_count': resume_features.get('word_count', 0),
+                    'text_length': resume_features.get('text_length', 0),
+                    'has_projects': 1 if 'project' in str(resume_features).lower() else 0,
+                    'has_certifications': 1 if 'certif' in str(resume_features).lower() else 0
+                }
+                
+                # Get ML prediction
+                ml_probability = self.ml_models.predict_placement_probability(
+                    ml_features, 
+                    required_exp
+                )
+                
+                # Get resume quality
+                quality_result = self.ml_models.predict_resume_quality(ml_features)
+                resume_quality = quality_result['quality']
+                
+                # Blend traditional and ML predictions (70% ML, 30% traditional)
+                final_probability = ml_probability * 0.7 + traditional_probability * 0.3
+            except Exception as e:
+                print(f"ML prediction error: {e}")
+                final_probability = traditional_probability
+        else:
+            final_probability = traditional_probability
         
         # Convert to percentage
-        percentage = round(final_probability * 100, 1)
+        percentage = round(final_probability, 1)
         
-        return {
+        result = {
             'company': company_name,
             'probability': percentage,
             'factors': {
@@ -158,6 +203,13 @@ class CompanyMatcher:
             'candidate_experience': resume_exp,
             'confidence': 'high' if percentage > 70 else 'medium' if percentage > 40 else 'low'
         }
+        
+        # Add ML-specific info if available
+        if resume_quality:
+            result['resume_quality'] = resume_quality
+            result['ml_enhanced'] = True
+        
+        return result
     
     def get_all_company_matches(self, resume_features: Dict) -> List[Dict]:
         """Get placement probability for all companies"""

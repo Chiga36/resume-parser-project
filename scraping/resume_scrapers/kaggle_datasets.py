@@ -1,7 +1,19 @@
-import kaggle
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
+
+# Load .env BEFORE importing kaggle
+load_dotenv()
+
+# Set Kaggle credentials from .env
+os.environ['KAGGLE_USERNAME'] = os.getenv('KAGGLE_USERNAME', '')
+os.environ['KAGGLE_KEY'] = os.getenv('KAGGLE_KEY', '')
+
+# NOW import kaggle after setting env vars
+import kaggle
+
 from config import Config
 
 class ResumeDatasetDownloader:
@@ -24,9 +36,9 @@ class ResumeDatasetDownloader:
                     path=self.config.RESUMES_DIR,
                     unzip=True
                 )
-                print(f"Successfully downloaded {dataset}")
+                print(f"✅ Successfully downloaded {dataset}")
             except Exception as e:
-                print(f"Error downloading {dataset}: {str(e)}")
+                print(f"❌ Error downloading {dataset}: {str(e)}")
     
     def download_ner_dataset(self):
         """Download NER training dataset for resume parsing"""
@@ -37,9 +49,9 @@ class ResumeDatasetDownloader:
                 path=f"{self.config.RESUMES_DIR}/ner",
                 unzip=True
             )
-            print("Successfully downloaded NER dataset")
+            print("✅ Successfully downloaded NER dataset")
         except Exception as e:
-            print(f"Error downloading NER dataset: {str(e)}")
+            print(f"❌ Error downloading NER dataset: {str(e)}")
 
 if __name__ == "__main__":
     downloader = ResumeDatasetDownloader()

@@ -1,8 +1,9 @@
 from typing import Dict, List
+from models.ml_inference import MLModelInference
+
 
 class RecommendationEngine:
     """Generate recommendations to improve resume"""
-    
     def __init__(self):
         self.skill_categories = {
             'languages': ['Python', 'Java', 'JavaScript', 'C++', 'Go', 'TypeScript'],
@@ -11,6 +12,16 @@ class RecommendationEngine:
             'databases': ['SQL', 'PostgreSQL', 'MongoDB', 'Redis'],
             'tools': ['Git', 'CI/CD', 'Jira', 'Jenkins']
         }
+        
+        # Load ML models for skill recommendations
+        try:
+            self.ml_models = MLModelInference()
+            self.use_ml = True
+            print("✅ ML models loaded in Recommendation engine")
+        except:
+            print(f"⚠️ ML models not loaded: {e}")
+            self.ml_models = None
+            self.use_ml = False
     
     def analyze_resume(self, resume_features: Dict, company_matches: List[Dict]) -> Dict:
         """Generate comprehensive recommendations"""
@@ -86,6 +97,16 @@ class RecommendationEngine:
                         suggested_skills.add(skill)
             
             recommendations['missing_skills'] = list(suggested_skills)[:10]
+        if self.use_ml and resume_features.get('skills'):
+            try:
+                ml_recommendations = self.ml_models.recommend_skills(
+                    resume_features.get('skills', []),
+                    top_n=10
+                )
+                # Combine with existing recommendations
+                recommendations['ml_recommended_skills'] = ml_recommendations
+            except Exception as e:
+                print(f"ML skill recommendation error: {e}")
         
         # Format suggestions
         if not resume_features.get('skills'):
