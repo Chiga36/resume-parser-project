@@ -17,6 +17,12 @@ class Config:
     PROCESSED_DATA_DIR = f"{DATA_DIR}/processed"
     RESUMES_DIR = f"{DATA_DIR}/resumes"
     COMPANY_PROFILES_DIR = f"{DATA_DIR}/company_profiles"
+    # Add these lines to Config class
+    # Metrics settings
+    METRICS_DIR = f"{DATA_DIR}/metrics"
+    METRICS_RETENTION_DAYS = 30
+    ENABLE_PERFORMANCE_TRACKING = True
+
     
     # API settings
     API_HOST = "0.0.0.0"

@@ -2,6 +2,8 @@ import pickle
 import numpy as np
 from pathlib import Path
 from typing import Dict, List
+from models.performance_tracker import performance_tracker
+import time
 
 class MLModelInference:
     """Use trained ML models for predictions"""
@@ -34,6 +36,8 @@ class MLModelInference:
     
     def predict_resume_quality(self, features: Dict) -> Dict:
         """Predict resume quality using trained classifier"""
+        start_time = time.time()
+        
         if self.resume_classifier is None:
             return {"quality": "Unknown", "confidence": 0.0}
         
@@ -55,17 +59,27 @@ class MLModelInference:
         quality = self.label_encoder.inverse_transform([prediction])[0]
         confidence = float(max(probabilities))
         
+        # Track performance
+        prediction_time = time.time() - start_time
+        performance_tracker.track_ml_prediction(
+            'resume_classifier', 
+            confidence, 
+            prediction_time
+        )
+        
         return {
             "quality": quality,
             "confidence": confidence,
             "probabilities": {
-                label: float(prob) 
+                label: float(prob)
                 for label, prob in zip(self.label_encoder.classes_, probabilities)
             }
         }
     
     def predict_placement_probability(self, features: Dict, company_exp_required: float) -> float:
         """Predict placement probability using trained model"""
+        start_time = time.time()
+        
         if self.placement_predictor is None:
             return 0.0
         
@@ -82,9 +96,18 @@ class MLModelInference:
         
         # Predict
         probability = self.placement_predictor.predict(feature_vector)[0]
+        probability = float(np.clip(probability, 0, 100))
+        
+        # Track performance
+        prediction_time = time.time() - start_time
+        performance_tracker.track_ml_prediction(
+            'placement_predictor', 
+            probability / 100, 
+            prediction_time
+        )
         
         # Clip to 0-100 range
-        return float(np.clip(probability, 0, 100))
+        return probability
     
     def recommend_skills(self, current_skills: List[str], top_n: int = 5) -> List[str]:
         """Recommend skills based on co-occurrence"""
